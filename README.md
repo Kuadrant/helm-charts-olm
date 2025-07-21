@@ -39,7 +39,7 @@ If you choose to install tools charts:
 
 # How to run
 
-1. Set up [values.yaml](./values.yaml) (and [tool values.yaml](tools/values.yaml))
+1. Set up [values.yaml](./values.yaml) (and [tool values.yaml](values-tools.yaml))
 2. Login to your cluster
 3. Run:
 ```sh
@@ -60,7 +60,7 @@ More info about required objects see [testsuite wiki](https://github.com/Kuadran
 Look at [example-additionalManifests.yaml](./example-additionalManifests.yaml)
 
 Use `-t` flag to get Kuadrant testsuite dependencies installed: `./install.sh -t`. It sets `tools.enabled` to true 
-and makes Helm consume additional values from additionalManifests.yaml and installs [tools](./tools) helm charts.
+and makes Helm consume additional values from additionalManifests.yaml and installs tools helm charts.
 
 If you want to install just tools use `./tools-install.sh`. Add `-k` option to install on Kind.
 
@@ -70,21 +70,21 @@ If you do not want to use helper `./install.sh` (and `./uninstall.sh`) script:
 
 1. Install Operators
 ```sh
-helm install --values values.yaml --wait -g operators/
+helm install --values values.yaml --wait -g charts/kuadrant-operators
 ```
 2. Install instances (operands)
 ```sh
-helm install --values values.yaml --values additionalManifests.yaml --wait -g instances/
+helm install --values values.yaml --values additionalManifests.yaml --wait -g charts/kuadrant-instances
 ```
 
 3. (Optional) Install tools operators
 ```sh
-helm install --values tools/values.yaml --wait -g tools/operators/
+helm install --values values-tools.yaml --wait -g charts/tools-operators
 ```
 
 4. (Optional) Install tools instances
 ```sh
-helm install --values tools/values.yaml --wait --timeout 10m -g tools/instances/
+helm install --values values-tools.yaml --wait --timeout 10m -g charts/tools-instances
 ```
 
 # Troubleshooting

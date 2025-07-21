@@ -62,7 +62,7 @@ istio:
   # 'ocp' for installing on Openshift 4.19+
   # if left empty no Gateway API implementation is installed
   istioProvider: ossm3
-  ossm3: # Openshift Service Mesh, but version 3
+  ossm3:  # Openshift Service Mesh, but version 3
     version: v1.24-latest
     operator:
       channel: stable
@@ -73,11 +73,11 @@ istio:
 certManager:
   operator:
     channel: stable-v1
-    startingCSV: cert-manager-operator.v1.15.0 # Ignored if 'Automatic' bellow
+    startingCSV: cert-manager-operator.v1.15.0  # Ignored if 'Automatic' bellow
     installPlanApproval: Automatic  # can be 'Automatic' or 'Manual'
 
 # Optional objects used for Kuadrant testing
-# Note: For setting tools values go to tools/values.yaml
+# Note: For setting tools values go to values-tools.yaml
 tools:
   enabled: "false"  # if 'true' the testing environment will be set up
 

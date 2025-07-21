@@ -16,19 +16,19 @@ if [[ "$INSTALL_RHCL_GA" == "true" ]]; then
 fi
 
 echo "---Installing operators---"
-helm_cmd="helm install $additional_flags --wait kuadrant-operators operators/"
+helm_cmd="helm install $additional_flags --wait kuadrant-operators charts/kuadrant-operators"
 eval "$helm_cmd"
 
 echo "--Installing instances---"
-helm_cmd="helm install $additional_flags --wait kuadrant-instances instances/"
+helm_cmd="helm install $additional_flags --wait kuadrant-instances charts/kuadrant-instances"
 eval "$helm_cmd"
 
 if [[ "$1" == "-t" ]]; then
 echo "--Installing tools operators"
-helm install --wait tools-operators tools/operators
+helm install --wait tools-operators charts/tools-instances
 
 echo "--Installing tools instances"
-helm install --wait --timeout 10m tools-instances tools/instances
+helm install --wait --timeout 10m tools-instances charts/tools-instances
 fi
 
 echo "Success!"

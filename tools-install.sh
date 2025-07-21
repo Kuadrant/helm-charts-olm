@@ -12,9 +12,9 @@ if [[ "$1" == "-k" ]]; then
 fi
 
 echo "--Installing tools operators"
-helm_cmd="helm install $additional_flags --wait tools-operators tools/operators"
+helm_cmd="helm install $additional_flags --wait tools-operators charts/tools-operators"
 eval "$helm_cmd"
 
 echo "--Installing tools instances"
-helm_cmd="helm install $additional_flags --wait --timeout 10m tools-instances tools/instances"
+helm_cmd="helm install $additional_flags --wait --timeout 10m tools-instances charts/tools-instances"
 eval "$helm_cmd"

@@ -1,7 +1,7 @@
-{{ if eq .Values.tools.enabled true }}
+{{ if .Values.tools.enabled }}
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: kuadrant2
+  name: kuadrant
 spec: {}
 {{end}}

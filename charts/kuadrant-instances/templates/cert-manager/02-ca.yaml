@@ -1,4 +1,4 @@
-{{ if eq .Values.tools.enabled true }}
+{{ if .Values.tools.enabled }}
 kind: Secret
 apiVersion: v1
 metadata:

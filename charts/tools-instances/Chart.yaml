@@ -1,6 +1,6 @@
 apiVersion: v2
-name: tools
-description: A Helm chart containing operators tools needed for testing Kuadrant
+name: tools-instances
+description: A Helm chart containing tools needed for testing Kuadrant
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -21,10 +21,3 @@ version: 0.1.0
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 appVersion: "1.0"
-
-dependencies: []
-#  - name: coredns
-#    version: ~1.40.0
-#    repository: https://coredns.github.io/helm
-#    condition: coredns.enabled
-

@@ -13,7 +13,7 @@ tools:
     keycloakProvider: "operator"
     operator:
       channel: stable-v26
-      startingCSV: rhbk-operator.v26.0.10-opr.1 # Ignored if 'Automatic' bellow
+      startingCSV: rhbk-operator.v26.0.10-opr.1  # Ignored if 'Automatic' bellow
       installPlanApproval: Automatic  # can be 'Automatic' or 'Manual'
     deployment:
       image: quay.io/keycloak/keycloak:26.3

@@ -23,7 +23,7 @@ spec:
         name: set-no-ssl
         envFrom:
         - secretRef:
-            name: keycloak-initial-admin  # created by Keycloak operator or tools/instances/templates/keycloak/deployment/00-secret.yaml
+            name: keycloak-initial-admin  # created by Keycloak operator or charts/tools-instances/templates/keycloak/deployment/00-secret.yaml
         - secretRef:
             name: credential-sso
         resources: {}

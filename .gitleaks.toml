@@ -3,6 +3,6 @@ description = "Global Allowlist"
 
 paths = [
     # Ignore testing CA
-    "instances/templates/cert-manager/ca/tls.key",
-    "instances/templates/cert-manager/02-ca.yaml"
+    "charts/kuadrant-instances/templates/cert-manager/ca/tls.key",
+    "charts/kuadrant-instances/templates/cert-manager/02-ca.yaml"
 ]
