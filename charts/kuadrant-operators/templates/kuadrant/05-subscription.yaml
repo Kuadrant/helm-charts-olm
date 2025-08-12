@@ -17,6 +17,7 @@ spec:
   source: {{ .Values.kuadrant.catalogSource }}
   sourceNamespace: {{ .Values.kuadrant.catalogSourceNamespace }}
 {{- end }}
+{{- if ne .Values.kuadrant.operatorName "authorino-operator" }}
   config:
     env:
       - name: "AUTH_SERVICE_TIMEOUT"
@@ -28,4 +29,5 @@ spec:
 {{- if .Values.kuadrant.wasmPluginImage }}
       - name: "RELATED_IMAGE_WASMSHIM"
         value: {{ .Values.kuadrant.wasmPluginImage }}
+{{- end }}
 {{- end }}

@@ -1,2 +1,4 @@
+{{if ne .Values.kuadrant.operatorName "authorino-operator"}}
 {{ $args := dict "namespace" "cert-manager-operator" "subscription" "openshift-cert-manager-operator" }}
 {{ include "operators.olm-wait" $args }}
+{{end}}

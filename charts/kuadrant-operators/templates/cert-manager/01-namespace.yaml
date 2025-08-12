@@ -1,5 +1,7 @@
+{{if ne .Values.kuadrant.operatorName "authorino-operator"}}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: cert-manager-operator
 spec: {}
+{{end}}
