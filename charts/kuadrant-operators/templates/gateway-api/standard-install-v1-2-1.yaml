@@ -1,4 +1,4 @@
-{{- if and (eq .Values.gatewayAPI.version "v1.2.1") (ne .Values.istio.istioProvider "ocp") }}
+{{- if and (eq .Values.gatewayAPI.version "v1.2.1") (ne .Values.istio.istioProvider "ocp") (ne .Values.kuadrant.operatorName "authorino-operator") }}
 # Copyright 2023 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

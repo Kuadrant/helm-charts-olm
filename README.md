@@ -88,6 +88,37 @@ helm install --values values-tools.yaml --wait -g charts/tools-operators
 helm install --values values-tools.yaml --wait --timeout 10m -g charts/tools-instances
 ```
 
+### Installing Authorino Standalone
+
+It is possible to use the charts to install only the Authorino operator without the other Kuadrant dependencies (Cert-Manager, Istio/OSSM, Gateway API). 
+This is useful for scenarios where you only need the authorization capabilities of Authorino.
+
+This is controlled by the `kuadrant.operatorName` value. 
+To install only the Authorino operator, follow these steps:
+
+1.  Install the operators chart:
+    This command will install the OLM subscription for the Authorino operator.
+    ```sh
+    helm install my-authorino-operators ./charts/kuadrant-operators \
+      --wait \
+      --set kuadrant.operatorName=authorino-operator
+    ```
+
+After the operator is running, you need to create an `Authorino` Custom Resource (CR) to deploy an instance of the Authorino server. 
+You can do this by applying a YAML file.
+
+2. (Optional) Installing Test Resources
+
+The `instances` chart is used for development purposes to set up resources needed by the test suite (like the `kuadrant` and `kuadrant2` namespaces). 
+Regular users installing Authorino for their own use cases will likely not need this step.
+
+If you need to run the project's test suite, you can install it with the following command:
+```sh
+helm install my-authorino-instances ./charts/kuadrant-instances \
+  --set kuadrant.operatorName=authorino-operator \
+  --set tools.enabled=true  
+```
+
 # Troubleshooting
 
 ## Cannot re-use name

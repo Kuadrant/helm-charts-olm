@@ -1,4 +1,4 @@
-{{if eq .Values.istio.istioProvider "ossm3"}}
+{{if and (eq .Values.istio.istioProvider "ossm3") (ne .Values.kuadrant.operatorName "authorino-operator") }}
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:

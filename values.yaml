@@ -14,6 +14,7 @@ kuadrant:
 
   # 'kuadrant-operator' if installing upstream
   # 'rhcl-operator' if installing downstream
+  # 'authorino-operator' if installing Authorino standalone
   operatorName: kuadrant-operator
 
   # 'preview' for nightly builds, release candidates and builds from Pull requests

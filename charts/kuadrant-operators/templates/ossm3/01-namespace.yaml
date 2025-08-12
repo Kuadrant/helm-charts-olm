@@ -1,4 +1,4 @@
-{{if eq .Values.istio.istioProvider "ossm3"}}
+{{if and (eq .Values.istio.istioProvider "ossm3") (ne .Values.operatorName "authorino-operator") }}
 apiVersion: v1
 kind: Namespace
 metadata:
