@@ -1,4 +1,4 @@
-{{if eq .Values.istio.istioProvider "ossm3"}}
+{{if and (eq .Values.istio.istioProvider "ossm3") (ne .Values.kuadrant.operatorName "authorino-operator") }}
 {{ $args := dict "namespace" .Values.istio.operatorNamespace "subscription" "servicemeshoperator3" }}
 {{ include "operators.olm-wait" $args }}
 {{end}}

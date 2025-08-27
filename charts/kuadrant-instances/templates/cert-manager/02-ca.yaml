@@ -1,4 +1,4 @@
-{{ if .Values.tools.enabled }}
+{{if and .Values.tools.enabled (ne .Values.kuadrant.operatorName "authorino-operator") }}
 kind: Secret
 apiVersion: v1
 metadata:
