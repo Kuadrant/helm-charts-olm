@@ -17,6 +17,7 @@ spec:
   source: {{ .Values.kuadrant.catalogSource }}
   sourceNamespace: {{ .Values.kuadrant.catalogSourceNamespace }}
 {{- end }}
+{{- if ne .Values.kuadrant.operatorName "authorino-operator" }}
   config:
     env:
       - name: "AUTH_SERVICE_TIMEOUT"
@@ -37,4 +38,5 @@ spec:
       - name: extensions-binary-volume
         persistentVolumeClaim:
           claimName: extensions-pvc
+{{- end }}
 {{- end }}
