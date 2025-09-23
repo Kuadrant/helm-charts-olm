@@ -23,7 +23,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACES
-              value: "kuadrant"  # todo replace me
+              value: ""  # empty means all namespaces, left here for future modification
           args: [ "-conf", "/etc/coredns/Corefile" ]
           volumeMounts:
             - name: config-volume
@@ -85,4 +85,9 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           operator: Exists
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: "100%"
 {{ end }}
