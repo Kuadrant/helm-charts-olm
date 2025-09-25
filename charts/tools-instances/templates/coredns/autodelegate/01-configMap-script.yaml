@@ -1,0 +1,104 @@
+{{ if .Values.tools.coredns.autoDelegate }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-install-autodelegate
+  namespace: {{ .Values.tools.namespace }}
+data:
+  "create.sh": |
+    #!/bin/bash
+    # TODO in AWS this can be a hostname, not IP
+    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    ZONE="{{ .Values.tools.coredns.zone }}"
+
+    cat > /tmp/tmp-change-batch.json <<EOF
+    {
+      "Comment": "Create - Autodelegate script helm-olm",
+      "Changes": [
+        {
+          "Action": "CREATE",
+          "ResourceRecordSet": {
+            "Name": "ns1.${ZONE}",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+              {
+                "Value": "$COREDNS_IP"
+              }
+            ]
+          }
+        },
+        {
+          "Action": "CREATE",
+          "ResourceRecordSet": {
+            "Name": "${ZONE}",
+            "Type": "NS",
+            "TTL": 300,
+            "ResourceRecords": [
+              { "Value": "ns1.${ZONE}" }
+            ]
+          }
+        }
+      ]
+    }
+    EOF
+    CHANGE_ID=$(aws route53 change-resource-record-sets \
+        --hosted-zone-id "${ZONE_ID}" \
+        --change-batch file:///tmp/tmp-change-batch.json \
+        --query 'ChangeInfo.Id' \
+        --output text)
+    aws route53 wait resource-record-sets-changed --id "$CHANGE_ID"
+
+    cat > /tmp/coredns-secret.yaml <<EOF
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: coredns-credentials
+      namespace: {{ .Values.tools.namespace }}
+      annotations:
+        base_domain: ${ZONE%?}  # remove trailing dot
+    type: kuadrant.io/coredns
+    stringData:
+      NAMESERVERS: "${COREDNS_IP}:53"
+      ZONES: "${ZONE%?}"
+    EOF
+    kubectl apply -f /tmp/coredns-secret.yaml
+  "delete.sh": |
+    #!/bin/bash
+    # TODO in AWS this can be a hostname, not IP
+    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    ZONE="{{ .Values.tools.coredns.zone }}"
+
+    cat > /tmp/tmp-change-batch.json <<EOF
+    {
+      "Comment": "Delete - Autodelegate script helm-olm",
+      "Changes": [
+        {
+          "Action": "DELETE",
+          "ResourceRecordSet": {
+            "Name": "ns1.${ZONE}",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+              {
+                "Value": "$COREDNS_IP"
+              }
+            ]
+          }
+        },
+        {
+          "Action": "DELETE",
+          "ResourceRecordSet": {
+            "Name": "${ZONE}",
+            "Type": "NS",
+            "TTL": 300,
+            "ResourceRecords": [
+              { "Value": "ns1.${ZONE}" }
+            ]
+          }
+        }
+      ]
+    }
+    EOF
+    aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch file:///tmp/tmp-change-batch.json
+{{ end }}
