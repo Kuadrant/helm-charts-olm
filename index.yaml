@@ -3,9 +3,9 @@ entries:
   kuadrant-instances:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2025-09-18T06:45:39.36770875Z"
+    created: "2025-09-25T11:44:24.1474555Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
-    digest: 210bd1c1ff7f6883de5b9185b5e849384bce372da951599b76c020f01570ab1b
+    digest: e3e17a76f7e279dfc49f00cb9fe1f89198e00e66b3271c5df1a23ef8cadbb1ec
     name: kuadrant-instances
     type: application
     urls:
@@ -14,9 +14,9 @@ entries:
   kuadrant-operators:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2025-09-18T06:45:39.377011721Z"
+    created: "2025-09-25T11:44:24.15697254Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
-    digest: 324acf66452b440ff2356ce46f9054b501cf53300b6213199b04fa9854a23123
+    digest: 8bbd359dfd799c853f4074b87f0eb60819cea17d17d2071003d91287d29f208f
     name: kuadrant-operators
     type: application
     urls:
@@ -25,9 +25,9 @@ entries:
   tools-instances:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2025-09-18T06:45:39.377507938Z"
+    created: "2025-09-25T11:44:24.157504434Z"
     description: A Helm chart containing tools needed for testing Kuadrant
-    digest: a09ee7e1c10e593c2b05da075cc80567a3f99a2102b6b68c7eabb9246e13ed4b
+    digest: a34492ad57a66873cc0efe79e113145dfa8b925440560f93721c85274f852510
     name: tools-instances
     type: application
     urls:
@@ -36,12 +36,12 @@ entries:
   tools-operators:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2025-09-18T06:45:39.377826052Z"
+    created: "2025-09-25T11:44:24.157768777Z"
     description: A Helm chart containing operators tools needed for testing Kuadrant
-    digest: 87e2da16b2f78ecc2f1c11cfe18ba64b8862882dee4ae67516373e83097f21b5
+    digest: bf0742eca5cd85e4c276fb4c1990594529eb5e8aa6b03d8c0ea5df807662c9ad
     name: tools-operators
     type: application
     urls:
     - tools-operators-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-18T06:45:39.367195131Z"
+generated: "2025-09-25T11:44:24.14697379Z"
