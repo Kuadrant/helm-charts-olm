@@ -1,0 +1,5 @@
+{{- range .Values.toolsManifests }}
+---
+{{ tpl (. | toYaml) $ }}
+{{- end }}
+
