@@ -16,7 +16,7 @@ tools:
       startingCSV: rhbk-operator.v26.0.10-opr.1  # Ignored if 'Automatic' bellow
       installPlanApproval: Automatic  # can be 'Automatic' or 'Manual'
     deployment:
-      image: quay.io/keycloak/keycloak:26.3
+      image: quay.io/keycloak/keycloak:26.4
     database:
       image: registry.redhat.io/rhel9/postgresql-16
   redis:
