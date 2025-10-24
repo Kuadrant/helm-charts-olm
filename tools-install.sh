@@ -5,7 +5,7 @@ set -e; set -o pipefail;
 
 cd "$(dirname "$0")"
 
-additional_flags=''
+additional_flags='--values additionalManifests.yaml'
 
 if [[ "$1" == "-k" ]]; then
     additional_flags+=" --set tools.keycloak.keycloakProvider=deployment"

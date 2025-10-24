@@ -37,5 +37,11 @@ tools:
   coredns:
     enable: false
     metrics: false
-    zone: "k.example.com"
+    # be sure to add trailing dot "."
+    zone: "k.example.com."
+    # Autodelegation script will delegate to route53 if set to true
+    # You need to have `coredns-autodelegate` secret in additionalManifests
+    autoDelegate: false
     image: quay.io/kuadrant/coredns-kuadrant:latest
+
+toolsManifests: []
