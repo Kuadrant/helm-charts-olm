@@ -28,6 +28,10 @@ spec:
         value: "1000ms"
       - name: "RATELIMIT_REPORT_SERVICE_TIMEOUT"
         value: "1000ms"
+      - name: "DNS_DEFAULT_TTL"
+        value: "1"
+      - name: "DNS_DEFAULT_LB_TTL"
+        value: "1"
 {{- if and (eq .Values.istio.istioProvider "ocp") (eq .Values.kuadrant.operatorName "kuadrant-operator") }}
       - name: "ISTIO_GATEWAY_CONTROLLER_NAMES"
         value: "openshift.io/gateway-controller/v1"
