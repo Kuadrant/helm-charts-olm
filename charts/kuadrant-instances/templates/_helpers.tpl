@@ -60,11 +60,9 @@ data:
     #!/bin/bash
     set -xe
     kubectl wait --for=condition=Ready kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
-    kubectl patch kuadrant kuadrant-sample --namespace {{ .namespace }} --type merge --patch '{"spec":{"observability":{"enable":true}}}'
     kubectl patch limitador limitador --namespace {{ .namespace }} --type merge --patch '{"spec":{"verbosity":3}}'
     kubectl patch authorino authorino --namespace {{ .namespace }} --type merge --patch '{"spec":{"logLevel":"debug", "logMode": "development"}}'
     kubectl wait --for=condition=Ready kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
-    kubectl wait --for=condition=Ready limitador limitador --namespace {{ .namespace }} --timeout=300s
     kubectl wait --for=condition=Ready authorino authorino --namespace {{ .namespace }} --timeout=300s
 kind: ConfigMap
 metadata:
