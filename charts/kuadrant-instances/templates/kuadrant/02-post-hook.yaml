@@ -1,0 +1,4 @@
+{{ if .Values.kuadrant.enableDebug }}
+{{ $args := dict "namespace" .Values.kuadrant.namespace }}
+{{ include "kuadrant.enable-debug" $args }}
+{{ end }}

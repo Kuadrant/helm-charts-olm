@@ -28,6 +28,10 @@ spec:
         value: "1000ms"
       - name: "RATELIMIT_REPORT_SERVICE_TIMEOUT"
         value: "1000ms"
+{{- if .Values.kuadrant.enableDebug }}
+      - name: "LOG_LEVEL"
+        value: "debug"
+{{- end }}
 {{- if and (eq .Values.istio.istioProvider "ocp") (eq .Values.kuadrant.operatorName "kuadrant-operator") }}
       - name: "ISTIO_GATEWAY_CONTROLLER_NAMES"
         value: "openshift.io/gateway-controller/v1"
