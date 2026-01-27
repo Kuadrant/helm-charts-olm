@@ -1,15 +1,15 @@
-{{/* Wait for Kuadrant, Limitador and Authorino CRs and patch them to enable observability and debug logging */}}
-{{- define "kuadrant.enable-debug" }}
+{{/* Restarts Kuadrant Operator if needed. Waits for Kuadrant, Limitador and Authorino CRs and patch them to enable observability and debug logging if desired */}}
+{{- define "kuadrant.post-install-helm-hook" -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: post-install-hook-enable-debug
+  name: post-install-helm-hook
   namespace: {{ .namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: post-install-hook-enable-debug-role
+  name: post-install-helm-hook-role
   namespace: {{ .namespace }}
 rules:
 - apiGroups:
@@ -39,40 +39,68 @@ rules:
   - patch
   - list
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: post-install-hook-enable-debug-rb
+  name: post-install-helm-hook-rb
   namespace: {{ .namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: post-install-hook-enable-debug-role
+  name: post-install-helm-hook-role
 subjects:
 - kind: ServiceAccount
-  name: post-install-hook-enable-debug
+  name: post-install-helm-hook
   namespace: {{ .namespace }}
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-install-helm-hook
+  namespace: {{ .namespace }}
 data:
   "run.sh": |
     #!/bin/bash
     set -xe
+
+    # First restart Kuadrant operator if needed
+    MESSAGE=$(kubectl get kuadrant kuadrant-sample --namespace {{ .namespace }} -o jsonpath='{.status.conditions[*].message}')
+    if [[ "$MESSAGE" == *"please restart Kuadrant Operator pod"* ]]; then
+        kubectl delete pod -l app=kuadrant --wait=true --namespace {{ .namespace }}
+    fi
     kubectl wait --for=condition=Ready kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
-    kubectl patch limitador limitador --namespace {{ .namespace }} --type merge --patch '{"spec":{"verbosity":3}}'
-    kubectl patch authorino authorino --namespace {{ .namespace }} --type merge --patch '{"spec":{"logLevel":"debug", "logMode": "development"}}'
+
+    ENABLE_DEBUG="{{ .enableDebug }}"
+    if [[ "$ENABLE_DEBUG" == "true" ]]; then
+        kubectl patch limitador limitador --namespace {{ .namespace }} --type merge --patch '{"spec":{"verbosity":3}}'
+        kubectl patch authorino authorino --namespace {{ .namespace }} --type merge --patch '{"spec":{"logLevel":"debug", "logMode": "development"}}'
+        kubectl wait --for=jsonpath={.status.observedGeneration}=$(kubectl get limitador limitador --namespace {{ .namespace }} -o jsonpath={.metadata.generation}) limitador limitador --namespace {{ .namespace }} --timeout=300s
+        kubectl wait --for=condition=Ready limitador limitador --namespace {{ .namespace }} --timeout=300s
+        # Authorino CR does not have `.status.observedGeneration` defined hence just this simple wait
+        kubectl wait --for=condition=Ready authorino authorino --namespace {{ .namespace }} --timeout=300s
+    fi
+
+    # Another wait for Kuadrant to get ready just to be on the safe side
+    kubectl wait --for=jsonpath={.status.observedGeneration}=$(kubectl get kuadrant kuadrant-sample --namespace {{ .namespace }} -o jsonpath={.metadata.generation}) kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
     kubectl wait --for=condition=Ready kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
-    kubectl wait --for=condition=Ready authorino authorino --namespace {{ .namespace }} --timeout=300s
-kind: ConfigMap
-metadata:
-  name: post-install-hook-enable-debug
-  namespace: {{ .namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: post-install-hook-enable-debug
+  name: post-install-helm-hook
   namespace: {{ .namespace }}
   annotations:
     "helm.sh/hook": post-install
@@ -93,7 +121,7 @@ spec:
       volumes:
         - name: script-volume
           configMap:
-            name: post-install-hook-enable-debug
-      serviceAccount: post-install-hook-enable-debug
+            name: post-install-helm-hook
+      serviceAccount: post-install-helm-hook
       restartPolicy: OnFailure
-{{- end }}
+{{- end -}}
