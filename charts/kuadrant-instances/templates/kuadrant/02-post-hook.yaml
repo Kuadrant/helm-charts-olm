@@ -1,0 +1,2 @@
+{{- $args := dict "namespace" .Values.kuadrant.namespace "enableDebug" .Values.kuadrant.enableDebug }}
+{{- include "kuadrant.post-install-helm-hook" $args }}

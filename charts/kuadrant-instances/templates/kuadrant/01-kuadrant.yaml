@@ -4,5 +4,11 @@ kind: Kuadrant
 metadata:
   name: kuadrant-sample
   namespace: {{ .Values.kuadrant.namespace }}
+{{ if eq .Values.kuadrant.enableDebug true }}
+spec:
+  observability:
+    enable: true
+{{ else }}
 spec: {}
+{{ end }}
 {{ end }}
