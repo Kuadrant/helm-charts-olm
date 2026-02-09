@@ -129,3 +129,14 @@ preOperatorInstallManifests:
     data:
       .dockerconfigjson: <dockerconfig>
     type: kubernetes.io/dockerconfigjson
+toolsManifests:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: coredns-autodelegate
+      namespace: tools
+    stringData:
+      AWS_ACCESS_KEY_ID: <ID>
+      ZONE_ID: <ZONE_ID>
+      AWS_SECRET_ACCESS_KEY: <KEY>
+    type: Opaque

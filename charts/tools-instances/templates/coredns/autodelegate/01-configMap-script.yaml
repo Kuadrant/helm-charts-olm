@@ -1,0 +1,125 @@
+{{ if and .Values.tools.coredns.enable .Values.tools.coredns.autoDelegate }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: post-install-autodelegate
+  namespace: {{ .Values.tools.namespace }}
+data:
+  "create.sh": |
+    #!/bin/bash
+    set -xe
+    export AWS_RETRY_MODE="adaptive"
+    export AWS_MAX_ATTEMPTS="10"
+    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
+    NS_NAME="{{ .Values.tools.coredns.nameserverName }}"
+    TTL=200
+
+    {{- range .Values.tools.coredns.zones  }}
+    ZONE="{{ . }}"
+
+    if [ -n "$COREDNS_IP" ]; then
+      # Create A record for the nameserver
+      CHANGE_BATCH=$(jq -n \
+        --arg name "${NS_NAME}.${ZONE}" \
+        --arg ip "$COREDNS_IP" \
+        --argjson ttl "$TTL" \
+        '{Changes: [{Action: "UPSERT", ResourceRecordSet: {Name: $name, Type: "A", TTL: $ttl, ResourceRecords: [{Value: $ip}]}}]}')
+      CHANGE_ID=$(aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch "$CHANGE_BATCH" \
+        --query 'ChangeInfo.Id' --output text)
+      aws route53 wait resource-record-sets-changed --id "$CHANGE_ID"
+
+      NS_VALUE="${NS_NAME}.${ZONE}"
+    else
+      NS_VALUE="${COREDNS_HOSTNAME}."
+    fi
+
+    # Get current NS records for the zone (if any)
+    CURRENT_NS=$(aws route53 list-resource-record-sets --hosted-zone-id "${ZONE_ID}" \
+      --query "ResourceRecordSets[?Name=='${ZONE}' && Type=='NS']" --output json)
+
+    if [ "$CURRENT_NS" == "[]" ]; then
+      # No existing NS records, create new
+      NEW_RECORDS=$(jq -n --arg value "$NS_VALUE" '[{Value: $value}]')
+    else
+      # Append to existing NS records
+      CURRENT_TTL=$(echo "$CURRENT_NS" | jq -r '.[0].TTL')
+      TTL=$CURRENT_TTL
+      NEW_RECORDS=$(echo "$CURRENT_NS" | jq --arg value "$NS_VALUE" \
+        '.[0].ResourceRecords + [{Value: $value}] | unique_by(.Value)')
+    fi
+
+    # Upsert NS record with combined values
+    CHANGE_BATCH=$(jq -n \
+      --arg name "${ZONE}" \
+      --argjson ttl "$TTL" \
+      --argjson records "$NEW_RECORDS" \
+      '{Changes: [{Action: "UPSERT", ResourceRecordSet: {Name: $name, Type: "NS", TTL: $ttl, ResourceRecords: $records}}]}')
+    CHANGE_ID=$(aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch "$CHANGE_BATCH" \
+      --query 'ChangeInfo.Id' --output text)
+    aws route53 wait resource-record-sets-changed --id "$CHANGE_ID"
+    {{ end }}
+  "delete.sh": |
+    #!/bin/bash
+    set -xe
+    export AWS_RETRY_MODE="adaptive"
+    export AWS_MAX_ATTEMPTS="10"
+    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
+    NS_NAME="{{ .Values.tools.coredns.nameserverName }}"
+
+    {{- range .Values.tools.coredns.zones  }}
+    ZONE="{{ . }}"
+
+    # Delete A record if using IP
+    if [ -n "$COREDNS_IP" ]; then
+      EXCLUDE_VALUE="${NS_NAME}.${ZONE}"
+      CURRENT_A=$(aws route53 list-resource-record-sets --hosted-zone-id "${ZONE_ID}" \
+        --query "ResourceRecordSets[?Name=='${NS_NAME}.${ZONE}' && Type=='A']" --output json)
+      if [ "$CURRENT_A" != "[]" ]; then
+        TTL=$(echo "$CURRENT_A" | jq -r '.[0].TTL')
+        CHANGE_BATCH=$(jq -n \
+          --arg name "${NS_NAME}.${ZONE}" \
+          --arg ip "$COREDNS_IP" \
+          --argjson ttl "$TTL" \
+          '{Changes: [{Action: "DELETE", ResourceRecordSet: {Name: $name, Type: "A", TTL: $ttl, ResourceRecords: [{Value: $ip}]}}]}')
+        aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch "$CHANGE_BATCH"
+      fi
+    else
+      EXCLUDE_VALUE="${COREDNS_HOSTNAME}."
+    fi
+
+    # Get current NS records for the zone
+    CURRENT_NS=$(aws route53 list-resource-record-sets --hosted-zone-id "${ZONE_ID}" \
+      --query "ResourceRecordSets[?Name=='${ZONE}' && Type=='NS']" --output json)
+
+    if [ "$CURRENT_NS" != "[]" ]; then
+      TTL=$(echo "$CURRENT_NS" | jq -r '.[0].TTL')
+      CURRENT_RECORDS=$(echo "$CURRENT_NS" | jq '.[0].ResourceRecords')
+
+      # Extract current values, filter out the one to exclude
+      REMAINING_VALUES=$(echo "$CURRENT_NS" | jq --arg exclude "${EXCLUDE_VALUE}" \
+        '.[0].ResourceRecords | map(select(.Value != $exclude))')
+      REMAINING_COUNT=$(echo "$REMAINING_VALUES" | jq 'length')
+
+      # possible race condition here; if multiple deleting clusters enter this part simultaneously, there will be a leftover NS record in route53
+      if [ "$REMAINING_COUNT" -eq 0 ]; then
+        # No remaining values, delete the NS record entirely
+        CHANGE_BATCH=$(jq -n \
+          --arg name "${ZONE}" \
+          --argjson ttl "$TTL" \
+          --argjson records "$CURRENT_RECORDS" \
+          '{Changes: [{Action: "DELETE", ResourceRecordSet: {Name: $name, Type: "NS", TTL: $ttl, ResourceRecords: $records}}]}')
+        aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch "$CHANGE_BATCH"
+      else
+        # Update with remaining values only
+        CHANGE_BATCH=$(jq -n \
+          --arg name "${ZONE}" \
+          --argjson ttl "$TTL" \
+          --argjson records "$REMAINING_VALUES" \
+          '{Changes: [{Action: "UPSERT", ResourceRecordSet: {Name: $name, Type: "NS", TTL: $ttl, ResourceRecords: $records}}]}')
+        aws route53 change-resource-record-sets --hosted-zone-id "${ZONE_ID}" --change-batch "$CHANGE_BATCH"
+      fi
+    fi
+    {{ end }}
+{{ end }}
