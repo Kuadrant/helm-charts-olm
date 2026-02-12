@@ -1,0 +1,32 @@
+{{ if and .Values.tools.coredns.enable .Values.tools.coredns.autoDelegate }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: autodelegate-cleanup
+  namespace: {{ .Values.tools.namespace }}
+  annotations:
+    "helm.sh/hook": pre-delete
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      containers:
+        - command:
+            - /bin/bash
+            - /scripts/delete.sh
+          image: quay.io/kuadrant/testsuite-pipelines-tools:latest
+          name: cleanup
+          volumeMounts:
+            - name: script-volume
+              mountPath: /scripts
+          resources: {}
+          envFrom:
+            - secretRef:
+                name: coredns-autodelegate
+      volumes:
+        - name: script-volume
+          configMap:
+            name: post-install-autodelegate
+      serviceAccountName: post-install-autodelegate-sa
+      restartPolicy: OnFailure
+{{ end }}

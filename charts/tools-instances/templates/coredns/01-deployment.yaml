@@ -85,4 +85,9 @@ spec:
       tolerations:
         - key: node-role.kubernetes.io/master
           operator: Exists
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: "100%"
 {{ end }}
