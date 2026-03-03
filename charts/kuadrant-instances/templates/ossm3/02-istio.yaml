@@ -8,6 +8,7 @@ spec:
   values:
 {{ if eq .Values.kuadrant.enableObservability true }}
     meshConfig:
+      accessLogFile: /dev/stdout
       defaultConfig:
         tracing: { }
       enableTracing: true
