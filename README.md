@@ -36,6 +36,7 @@ If you choose to install tools charts:
 - Redis
 - Dragonfly
 - Valkey
+- Coredns
 
 # How to run
 

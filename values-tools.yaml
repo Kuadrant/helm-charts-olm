@@ -34,5 +34,13 @@ tools:
   coredns:
     enable: false
     metrics: false
-    zone: "k.example.com"
+    # be sure to include the root domain dot "."
+    zones:
+      - "k.example.com."
+    # Autodelegation script will delegate to route53 if set to true
+    # You need to have `coredns-autodelegate` secret in additionalManifests
+    autoDelegate: false
+    nameserverName: "ns1"
     image: quay.io/kuadrant/coredns-kuadrant:latest
+
+toolsManifests: []
