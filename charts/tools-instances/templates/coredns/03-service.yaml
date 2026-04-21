@@ -19,7 +19,6 @@ spec:
       port: 53
       targetPort: "tcp-53"
   type: LoadBalancer
-  externalTrafficPolicy: Local
 ---
 {{ if .Values.tools.coredns.metrics }}
 apiVersion: v1
