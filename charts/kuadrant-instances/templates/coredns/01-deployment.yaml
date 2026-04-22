@@ -1,9 +1,9 @@
-{{ if .Values.tools.coredns.enable }}
+{{ if .Values.coredns.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: coredns
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
 spec:
@@ -24,7 +24,7 @@ spec:
       serviceAccountName: coredns-service
       containers:
         - name: "coredns"
-          image: {{ .Values.tools.coredns.image }}
+          image: {{ .Values.coredns.image }}
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACES
@@ -47,7 +47,7 @@ spec:
             - containerPort: 5300
               name: "tcp-53"
               protocol: TCP
-            {{- if .Values.tools.coredns.metrics }}
+            {{- if .Values.coredns.metrics }}
             - containerPort: 9153
               name: "tcp-9153"
               protocol: TCP
@@ -83,7 +83,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: coredns
+            name: corefile
             items:
               - key: Corefile
                 path: Corefile

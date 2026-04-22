@@ -1,21 +1,23 @@
-{{ if and .Values.tools.coredns.enable .Values.tools.coredns.autoDelegate }}
+{{ if and .Values.coredns.enable .Values.coredns.autoDelegate }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: post-install-autodelegate
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
 data:
   "create.sh": |
     #!/bin/bash
     set -xe
     export AWS_RETRY_MODE="adaptive"
     export AWS_MAX_ATTEMPTS="10"
-    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
-    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
-    NS_NAME="{{ .Values.tools.coredns.nameserverName }}"
+    NS_NAME="{{ .Values.coredns.nameserverName }}"
     TTL=200
 
-    {{- range .Values.tools.coredns.zones  }}
+    kubectl wait -n {{ .Values.coredns.namespace }} service coredns --timeout=120s --for=jsonpath='{.status.loadBalancer.ingress}' || exit 1
+    COREDNS_IP="$(kubectl get -n {{ .Values.coredns.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.coredns.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
+
+    {{- range .Values.coredns.zones  }}
     ZONE="{{ . }}"
 
     if [ -n "$COREDNS_IP" ]; then
@@ -64,11 +66,12 @@ data:
     set -xe
     export AWS_RETRY_MODE="adaptive"
     export AWS_MAX_ATTEMPTS="10"
-    COREDNS_IP="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
-    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.tools.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
-    NS_NAME="{{ .Values.tools.coredns.nameserverName }}"
+    NS_NAME="{{ .Values.coredns.nameserverName }}"
 
-    {{- range .Values.tools.coredns.zones  }}
+    COREDNS_IP="$(kubectl get -n {{ .Values.coredns.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].ip}')"
+    COREDNS_HOSTNAME="$(kubectl get -n {{ .Values.coredns.namespace }} service coredns '-o=jsonpath={.status.loadBalancer.ingress[0].hostname}')"
+
+    {{- range .Values.coredns.zones  }}
     ZONE="{{ . }}"
 
     # Delete A record if using IP

@@ -1,15 +1,15 @@
-{{ if and .Values.tools.coredns.enable .Values.tools.coredns.autoDelegate }}
+{{ if and .Values.coredns.enable .Values.coredns.autoDelegate }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: post-install-autodelegate-sa
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: post-install-autodelegate-role
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
 rules:
   - apiGroups:
       - ""
@@ -31,7 +31,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: post-install-autodelegate-rb
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -39,5 +39,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: post-install-autodelegate-sa
-    namespace: {{ .Values.tools.namespace }}
+    namespace: {{ .Values.coredns.namespace }}
 {{ end }}

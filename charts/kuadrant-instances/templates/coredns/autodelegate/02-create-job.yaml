@@ -1,9 +1,9 @@
-{{ if and .Values.tools.coredns.enable .Values.tools.coredns.autoDelegate }}
+{{ if and .Values.coredns.enable .Values.coredns.autoDelegate }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: post-install-autodelegate
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
   annotations:
     "helm.sh/hook": post-install
 spec:

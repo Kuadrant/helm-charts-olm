@@ -1,9 +1,9 @@
-{{ if .Values.tools.coredns.enable }}
+{{ if .Values.coredns.enable }}
 apiVersion: v1
 kind: Service
 metadata:
   name: coredns
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
 spec:
@@ -20,12 +20,12 @@ spec:
       targetPort: "tcp-53"
   type: LoadBalancer
 ---
-{{ if .Values.tools.coredns.metrics }}
+{{ if .Values.coredns.metrics }}
 apiVersion: v1
 kind: Service
 metadata:
   name: coredns-metrics
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
     component: metrics

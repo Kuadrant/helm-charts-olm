@@ -1,15 +1,15 @@
-{{ if and .Values.tools.coredns.enable .Values.tools.coredns.metrics }}
+{{ if and .Values.coredns.enable .Values.coredns.metrics }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: coredns
-  namespace: {{ .Values.tools.namespace }}
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
 spec:
   namespaceSelector:
     matchNames:
-      - {{ .Values.tools.namespace }}
+      - {{ .Values.coredns.namespace }}
   selector:
     matchLabels:
       app: coredns

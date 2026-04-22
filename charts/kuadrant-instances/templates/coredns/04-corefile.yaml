@@ -1,9 +1,9 @@
-{{ if .Values.tools.coredns.enable }}
+{{ if .Values.coredns.enable }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns
-  namespace: {{ .Values.tools.namespace }}
+  name: corefile
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
 data:
@@ -14,7 +14,7 @@ data:
       }
       ready
     }
-    {{- range .Values.tools.coredns.zones  }}
+    {{- range .Values.coredns.zones  }}
     {{ . }} {
       debug
       errors
