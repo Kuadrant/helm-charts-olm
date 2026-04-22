@@ -1,0 +1,27 @@
+{{ if .Values.tools.vault.enable }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-config
+  namespace: {{ .Values.vault.global.namespace }}
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -c
+        - >-
+          VAULT_NS={{ .Values.vault.global.namespace }} &&
+          kubectl -n $VAULT_NS wait pods -l app.kubernetes.io/name=vault --for condition=Ready --timeout=120s &&
+          (kubectl -n $VAULT_NS exec vault-0 -- vault auth enable kubernetes || true) &&
+          kubectl -n $VAULT_NS exec vault-0 -- sh -c 'vault write auth/kubernetes/config kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"' &&
+          echo 'path "secret/data/*" { capabilities = ["read"] }' | kubectl -n $VAULT_NS exec -i vault-0 -- vault policy write kuadrant-policy - &&
+          kubectl -n $VAULT_NS exec vault-0 -- vault write auth/kubernetes/role/kuadrant-role bound_service_account_names='*' bound_service_account_namespaces='*' policies=kuadrant-policy
+        image: quay.io/kuadrant/testsuite-pipelines-tools:latest
+        name: vault-config
+        resources: {}
+      serviceAccountName: vault
+      restartPolicy: OnFailure
+{{end}}
