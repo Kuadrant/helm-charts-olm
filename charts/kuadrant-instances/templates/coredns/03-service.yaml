@@ -1,0 +1,43 @@
+{{ if .Values.coredns.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: coredns
+  namespace: {{ .Values.coredns.namespace }}
+  labels:
+    app: coredns
+spec:
+  selector:
+    app: coredns
+  ports:
+    - name: "udp-53"
+      protocol: UDP
+      port: 53
+      targetPort: "udp-53"
+    - name: "tcp-53"
+      protocol: TCP
+      port: 53
+      targetPort: "tcp-53"
+  type: LoadBalancer
+---
+{{ if .Values.coredns.metrics }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: coredns-metrics
+  namespace: {{ .Values.coredns.namespace }}
+  labels:
+    app: coredns
+    component: metrics
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+spec:
+  selector:
+    app: coredns
+  ports:
+    - name: metrics
+      port: 9153
+      targetPort: "tcp-9153"
+{{ end }}
+{{ end }}

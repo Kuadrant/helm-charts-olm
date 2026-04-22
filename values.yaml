@@ -93,6 +93,20 @@ certManager:
     startingCSV: cert-manager-operator.v1.15.0  # Ignored if 'Automatic' bellow
     installPlanApproval: Automatic  # can be 'Automatic' or 'Manual'
 
+# Coredns
+coredns:
+  enable: false
+  namespace: kuadrant-coredns
+  metrics: false
+  # be sure to include the root domain dot "."
+  zones:
+    - "k.example.com."
+  # Autodelegation script will delegate to route53 if set to true
+  # You need to have `coredns-autodelegate` secret in additionalManifests
+  autoDelegate: false
+  nameserverName: "ns1"
+  image: quay.io/kuadrant/coredns-kuadrant:latest
+
 # Optional objects used for Kuadrant testing
 # Note: For setting tools values go to values-tools.yaml
 tools:

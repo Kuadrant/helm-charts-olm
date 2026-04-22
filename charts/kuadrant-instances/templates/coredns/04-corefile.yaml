@@ -1,30 +1,24 @@
-{{ if .Values.tools.coredns.enable }}
+{{ if .Values.coredns.enable }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns
-  namespace: {{ .Values.tools.namespace }}
+  name: corefile
+  namespace: {{ .Values.coredns.namespace }}
   labels:
     app: coredns
 data:
   Corefile: |-
-    kdrnt {
-      debug
-      errors
+    . {
       health {
         lameduck 5s
       }
       ready
-      log
-      transfer {
-        to *
-      }
-      kuadrant
-      prometheus 0.0.0.0:9153
     }
-    {{ .Values.tools.coredns.zone }} {
+    {{- range .Values.coredns.zones  }}
+    {{ . }} {
       debug
       errors
+      ready
       log
       geoip GeoLite2-City-demo.mmdb {
         edns-subnet
@@ -33,7 +27,11 @@ data:
       transfer {
         to *
       }
-      kuadrant
+      kuadrant {
+        rname kuadrant-qe-infra@redhat.com
+      }
       prometheus 0.0.0.0:9153
     }
+    {{ end }}
+
 {{ end }}
