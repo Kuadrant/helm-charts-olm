@@ -31,8 +31,22 @@ tools:
   customMetricsApiserver:
     enable: true
     image: quay.io/acristur/custom-metrics-apiserver:latest
+  vault:
+    enable: true
   coredns:
     enable: false
     metrics: false
     zone: "k.example.com"
     image: quay.io/kuadrant/coredns-kuadrant:latest
+
+vault:
+  fullnameOverride: vault
+  global:
+    namespace: tools-vault
+  injector:
+    enabled: false
+  server:
+    image:
+      repository: mirror.gcr.io/hashicorp/vault
+    dev:
+      enabled: true

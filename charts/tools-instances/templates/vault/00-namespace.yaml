@@ -1,0 +1,6 @@
+{{ if .Values.tools.vault.enable }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.vault.global.namespace }}
+{{end}}
