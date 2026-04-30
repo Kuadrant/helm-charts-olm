@@ -31,8 +31,33 @@ tools:
   customMetricsApiserver:
     enable: true
     image: quay.io/acristur/custom-metrics-apiserver:latest
+  vault:
+    enable: true
   coredns:
     enable: false
     metrics: false
     zone: "k.example.com"
     image: quay.io/kuadrant/coredns-kuadrant:latest
+
+vault:
+  fullnameOverride: vault
+  global:
+    namespace: tools-vault
+  injector:
+    enabled: false
+  server:
+    image:
+      repository: mirror.gcr.io/hashicorp/vault
+    service:
+      type: LoadBalancer
+    postStart:
+      - /bin/sh
+      - -c
+      - |
+        for i in $(seq 1 30); do vault status 2>/dev/null && break || sleep 2; done
+        vault auth enable kubernetes || true
+        vault write auth/kubernetes/config kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"
+        echo 'path "secret/data/*" { capabilities = ["read"] }' | vault policy write kuadrant-policy -
+        vault write auth/kubernetes/role/kuadrant-role bound_service_account_names='*' bound_service_account_namespaces='*' policies=kuadrant-policy
+    dev:
+      enabled: true
