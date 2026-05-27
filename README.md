@@ -87,6 +87,23 @@ helm install --values values-tools.yaml --wait -g charts/tools-operators
 helm install --values values-tools.yaml --wait --timeout 10m -g charts/tools-instances
 ```
 
+## Helm repo (with tagged versions)
+
+If you want to use helm repo add it with:
+```sh
+helm repo add kuadrant https://kuadrant.io/helm-charts-olm
+```
+and install like so:
+```sh
+helm install kuadrant/kuadrant-operators --wait -g
+```
+
+To list available versions you can install with the `--version` flag (`0.0.0` is always built from main):
+```sh
+helm search repo kuadrant/kuadrant-operators --versions --devel
+```
+
+
 ### Installing Authorino Standalone
 
 It is possible to use the charts to install only the Authorino operator without the other Kuadrant dependencies (Cert-Manager, Istio/OSSM, Gateway API). 
