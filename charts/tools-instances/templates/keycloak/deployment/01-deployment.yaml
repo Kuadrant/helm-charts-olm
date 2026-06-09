@@ -19,6 +19,7 @@ spec:
       containers:
         - name: keycloak
           image: {{ .Values.tools.keycloak.deployment.image }}
+          imagePullPolicy: Always
           args:
             - start-dev
             - --health-enabled=true
@@ -42,8 +43,6 @@ spec:
                   key: password
             - name: KC_HTTP_ENABLED
               value: "true"
-            - name: KC_PROXY_HEADERS
-              value: "xforwarded"
             - name: KC_DB
               value: "postgres"
             - name: "KC_DB_URL"
