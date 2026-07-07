@@ -10,6 +10,10 @@ on:
         description: 'Kuadrant operator index image (e.g., quay.io/kuadrant/kuadrant-operator-catalog:v1.4.3)'
         required: true
         type: string
+      ocpVersion:
+        description: 'Openshift version to pin operator versions for.'
+        required: true
+        default: v4.22
 
 jobs:
   release:
@@ -33,6 +37,7 @@ jobs:
       - name: Get frozen versions
         id: versions
         run: |
+          export CATALOG_IMAGE="registry.redhat.io/redhat/redhat-operator-index:${{ inputs.ocpVersion }}"
           ./script/get-all-versions.sh > frozen-versions.yaml
           echo "Frozen versions:"
           cat frozen-versions.yaml
