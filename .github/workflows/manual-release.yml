@@ -1,0 +1,109 @@
+name: Manual Helm chart release with frozen versions
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      indexImage:
+        description: 'Kuadrant operator index image (e.g., quay.io/kuadrant/kuadrant-operator-catalog:v1.4.3)'
+        required: true
+        type: string
+      ocpVersion:
+        description: 'Openshift version to pin operator versions for.'
+        required: true
+        default: v4.22
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Validate version format
+        run: |
+          if ! [[ "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Version must be in format X.Y.Z (e.g., 1.0.0)"
+            exit 1
+          fi
+
+      - name: Set up yq
+        run: sudo snap install yq
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Get frozen versions
+        id: versions
+        run: |
+          export CATALOG_IMAGE="registry.redhat.io/redhat/redhat-operator-index:${{ inputs.ocpVersion }}"
+          ./script/get-all-versions.sh > frozen-versions.yaml
+          echo "Frozen versions:"
+          cat frozen-versions.yaml
+
+      - name: Merge frozen versions with values files
+        run: |
+          yq eval-all '. as $item ireduce ({}; . * $item)' values.yaml frozen-versions.yaml > values-frozen.yaml
+          yq eval-all '. as $item ireduce ({}; . * $item)' values-tools.yaml frozen-versions.yaml > values-tools-frozen.yaml
+
+          echo "Merged values.yaml:"
+          cat values-frozen.yaml
+          echo ""
+          echo "Merged values-tools.yaml:"
+          cat values-tools-frozen.yaml
+
+          mv values-frozen.yaml values.yaml
+          mv values-tools-frozen.yaml values-tools.yaml
+
+      - name: Set index image
+        run: |
+          yq -i '.kuadrant.indexImage = "${{ inputs.indexImage }}"' values.yaml
+          echo "Set indexImage to: ${{ inputs.indexImage }}"
+
+      - name: Update chart versions
+        run: |
+          for chart_dir in charts/*/; do
+            chart_file="${chart_dir}Chart.yaml"
+            if [[ -f "$chart_file" ]]; then
+              yq -i '.version = "${{ inputs.version }}"' "$chart_file"
+              yq -i '.appVersion = "${{ inputs.version }}"' "$chart_file"
+              echo "Updated $chart_file to version ${{ inputs.version }}"
+            fi
+          done
+
+      - name: Package Helm charts
+        run: |
+          mkdir .cr-release-packages
+          helm package ./charts/* -d .cr-release-packages
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Copy chart to gh-pages
+        run: |
+          cp .cr-release-packages/* gh-pages/
+
+      - name: Generate new index.yaml
+        run: |
+          cd gh-pages
+          helm repo index . --merge index.yaml
+
+      - name: Commit and push
+        run: |
+          cd gh-pages
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add .
+          git commit -m "Release v${{ inputs.version }} with frozen versions (manual release)"
+          git push origin gh-pages
+
+      - name: Create Git tag
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "Release v${{ inputs.version }} with frozen versions"
+          git push origin "v${{ inputs.version }}"
