@@ -3,9 +3,9 @@ entries:
   kuadrant-instances:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-15T11:42:29.884157275Z"
+    created: "2026-07-21T11:16:12.523530627Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
-    digest: 4b07350d878b71e8798e63808dbf84221bc0213d7a56c06b603fb8361a4a64de
+    digest: be8067aee9d1f065e8fb7b0e5145c46371fec20dc5a98f8ed828713168afba08
     name: kuadrant-instances
     type: application
     urls:
@@ -14,9 +14,9 @@ entries:
   kuadrant-operators:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-15T11:42:29.893504792Z"
+    created: "2026-07-21T11:16:12.533886592Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
-    digest: f3c4cba43b3c7ed4b7a612ee17c42a43f5c20cc786daf45e090d7c3766c29007
+    digest: 6e454321a227f28533fa098267ee3b918fa10ff7cd18eb77411b481e0fb167c5
     name: kuadrant-operators
     type: application
     urls:
@@ -25,14 +25,14 @@ entries:
   tools-instances:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-15T11:42:29.897004181Z"
+    created: "2026-07-21T11:16:12.538414855Z"
     dependencies:
     - condition: tools.vault.enable
       name: vault
       repository: https://helm.releases.hashicorp.com
       version: 0.32.0
     description: A Helm chart containing tools needed for testing Kuadrant
-    digest: 56d41284d8cb4fcabd08ffeb9ac7a03b2f97029366fca4f728fadda6089308e1
+    digest: f649b186482cecf81fc4ceea270afb768cceee9ec81a202f1715554e8e79bcae
     name: tools-instances
     type: application
     urls:
@@ -41,12 +41,12 @@ entries:
   tools-operators:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-07-15T11:42:29.897318768Z"
+    created: "2026-07-21T11:16:12.538730851Z"
     description: A Helm chart containing operators tools needed for testing Kuadrant
-    digest: 84a183f0d13778df881fbeb807b93d0c3880e7e9814fe095723a978c40d09e12
+    digest: c6b3a884beb23461824cb6f00c16972fc8cd57e1879c01e21dafb51ec4eaabe7
     name: tools-operators
     type: application
     urls:
     - tools-operators-0.1.0.tgz
     version: 0.1.0
-generated: "2026-07-15T11:42:29.882811139Z"
+generated: "2026-07-21T11:16:12.522892392Z"
