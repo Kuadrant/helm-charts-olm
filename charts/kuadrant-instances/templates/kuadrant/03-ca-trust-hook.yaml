@@ -97,7 +97,7 @@ spec:
 
           # create a configmap with the merged CA bundle and patch the Authorino deployment to mount it as a volume
           kubectl create configmap authorino-cluster-trust-ca-bundle -n "$NAMESPACE" --from-file=ca-bundle.crt=/tmp/ca-bundle.crt --dry-run=client -o yaml | kubectl apply -f -
-          VOLUME='{"name":"cluster-trust-bundle","mountPath":"/etc/ssl/certs","configMaps":["authorino-cluster-trust-ca-bundle"]}'
+          VOLUME='{"name":"cluster-trust-bundle","mountPath":"/etc/pki/tls/certs","configMaps":["authorino-cluster-trust-ca-bundle"]}'
           if kubectl get authorino authorino -n "$NAMESPACE" -o jsonpath='{.spec.volumes.items}' 2>/dev/null | grep -q .; then
             kubectl patch authorino authorino -n "$NAMESPACE" --type json -p "[{\"op\": \"add\", \"path\": \"/spec/volumes/items/-\", \"value\": $VOLUME}]"
           else
