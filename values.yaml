@@ -81,7 +81,7 @@ kuadrant:
 
 # Installs Gateway API CRD's on cluster. Not needed for Openshift 4.19+
 gatewayAPI:
-  version: v1.5.0  # v1.3.0, v1.4.0, v1.5.0 available; leave empty for installing on Openshift 4.19+
+  version: ""  # v1.3.0, v1.4.0, v1.5.0 available; leave empty for installing on Openshift 4.19+
 
 # Gateway API implementation. Currently only Openshift Service Mesh 3 is supported
 istio:
