@@ -1,7 +1,7 @@
 name: Helm chart releases
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'charts/**'
       - 'values-tools.yaml'
@@ -9,16 +9,19 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: helm-gh-pages-publish
+      cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
       - name: Set up Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # ratchet:azure/setup-helm@v5
       - name: Package Helm charts
         run: |
           mkdir .cr-release-packages
           helm package ./charts/* -d .cr-release-packages
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # ratchet:actions/checkout@v3
         with:
           ref: gh-pages
           path: gh-pages

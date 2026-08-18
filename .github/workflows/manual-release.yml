@@ -1,0 +1,157 @@
+name: Manual Helm chart release with frozen versions
+on:
+  workflow_dispatch:
+    inputs:
+      kuadrantVersion:
+        description: 'Version with optional RC suffix and product. k=kuadrant r=RHCL (example: 1.0.0-k, 2.3.4-rc1-r)'
+        required: true
+        type: string
+      indexImage:
+        description: 'Kuadrant operator index image (example: quay.io/kuadrant/kuadrant-operator-catalog:v1.4.3)'
+        required: true
+        type: string
+      ocpVersion:
+        description: 'Openshift version to pin operator versions for. (example: v4.22)'
+        required: true
+        default: v4.22
+
+env:
+  HELM_VERSION: ${{ inputs.kuadrantVersion }}-${{ inputs.ocpVersion }}
+
+run-name: "Release of ${{ inputs.kuadrantVersion }}-${{ inputs.ocpVersion }}"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: helm-gh-pages-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+      - name: Validate kuadrant version format
+        run: |
+          if ! [[ "${{ inputs.kuadrantVersion }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)*-(k|r)$ ]]; then
+            echo "ERROR: Version must be in format X.Y.Z[-rcX]-(k|r) (e.g., 1.0.0-k, 2.3.4-rc1-r)"
+            exit 1
+          fi
+      - name: Validate ocp version format
+        run: |
+          if ! [[ "${{ inputs.ocpVersion }}" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+            echo "ERROR: Version must be in format vX.Y (e.g., v4.22)"
+            exit 1
+          fi
+
+      - name: Check tag does not already exist
+        run: |
+          if git ls-remote --exit-code --refs --tags origin "refs/tags/$HELM_VERSION" >/dev/null; then
+            echo "ERROR: Tag $HELM_VERSION already exists"
+            exit 1
+          fi
+
+      - name: Set up yq
+        run: sudo snap install yq
+
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # ratchet:azure/setup-helm@v5
+        with:
+          version: v3.18.4
+
+      - name: Set up opm
+        run: |
+          OPM_VERSION=$(curl -s https://api.github.com/repos/operator-framework/operator-registry/releases/latest | jq -r '.tag_name')
+          curl -Lo opm "https://github.com/operator-framework/operator-registry/releases/download/${OPM_VERSION}/linux-amd64-opm"
+          chmod +x opm
+          sudo mv opm /usr/local/bin/
+          opm version
+
+      - name: Set up container registry config
+        run: |
+          sudo mkdir -p /etc/containers
+          echo 'unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]' | sudo tee /etc/containers/registries.conf
+
+      - name: Log in to registry.redhat.io
+        run: podman login -u "${{ secrets.REDHAT_REGISTRY_USER }}" -p "${{ secrets.REDHAT_REGISTRY_PASSWORD }}" registry.redhat.io
+
+      - name: Get frozen versions
+        id: versions
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: |
+          export CATALOG_IMAGE="registry.redhat.io/redhat/redhat-operator-index:${{ inputs.ocpVersion }}"
+          ./script/get-all-versions.sh > frozen-versions.yaml
+          echo "Frozen versions:\n\n"
+          cat frozen-versions.yaml
+
+      - name: Merge frozen versions with values files
+        run: |
+          yq eval-all '. as $item ireduce ({}; . * $item)' values.yaml frozen-versions.yaml > values-frozen.yaml
+          yq eval-all '. as $item ireduce ({}; . * $item)' values-tools.yaml frozen-versions.yaml > values-tools-frozen.yaml
+
+          echo "Merged values.yaml:"
+          cat values-frozen.yaml
+          echo ""
+          echo "Merged values-tools.yaml:"
+          cat values-tools-frozen.yaml
+
+          mv values-frozen.yaml values.yaml
+          mv values-tools-frozen.yaml values-tools.yaml
+
+      - name: Set index image
+        run: |
+          yq -i '.kuadrant.indexImage = "${{ inputs.indexImage }}"' values.yaml
+          echo "Set indexImage to: ${{ inputs.indexImage }}"
+
+          if [[ "${{ inputs.kuadrantVersion }}" == *-k ]]; then
+            OPERATOR_NAME="kuadrant-operator"
+          else
+            OPERATOR_NAME="rhcl-operator"
+          fi
+          yq -i ".kuadrant.operatorName = \"$OPERATOR_NAME\"" values.yaml
+          echo "Set operatorName to: $OPERATOR_NAME"
+
+      - name: Update chart versions
+        run: |
+          for chart_dir in charts/*/; do
+            chart_file="${chart_dir}Chart.yaml"
+            if [[ -f "$chart_file" ]]; then
+              yq -i ".version = \"$HELM_VERSION\"" "$chart_file"
+              yq -i ".appVersion = \"$HELM_VERSION\"" "$chart_file"
+              echo "Updated $chart_file to version $HELM_VERSION"
+            fi
+          done
+
+      - name: Package Helm charts
+        run: |
+          mkdir .cr-release-packages
+          helm package ./charts/* -d .cr-release-packages
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Copy chart to gh-pages
+        run: |
+          cp .cr-release-packages/* gh-pages/
+
+      - name: Generate new index.yaml
+        run: |
+          cd gh-pages
+          helm repo index . --merge index.yaml
+
+      - name: Commit and push
+        run: |
+          cd gh-pages
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add .
+          git commit -m "Release $HELM_VERSION with frozen versions (manual release)"
+          git push origin gh-pages
+
+      - name: Create Git tag
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git tag -a "$HELM_VERSION" -m "Release $HELM_VERSION with frozen versions"
+          git push origin "$HELM_VERSION"
