@@ -13,12 +13,10 @@ for arg in "$@"; do
         -t)
             additional_flags+=" --values additionalManifests.yaml --set tools.enabled=true"
             ;;
-        -e)
-            echo "Including extensions manifests"
-            additional_flags+=" --values extensionsManifests.yaml"
-            ;;
     esac
 done
+
+extensions_image=$(grep 'extensionsImage:' values.yaml | head -1 | sed 's/.*extensionsImage:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | xargs)
 
 if [[ "$INSTALL_RHCL_GA" == "true" ]]; then
     additional_flags+=" --set kuadrant.indexImage='' --set kuadrant.operatorName=rhcl-operator --set kuadrant.channel=stable"
@@ -42,6 +40,12 @@ eval "$helm_cmd"
 echo "--Installing instances---"
 helm_cmd="helm install $additional_flags --wait kuadrant-instances charts/kuadrant-instances"
 eval "$helm_cmd"
+
+if [[ -n "$extensions_image" && -f "extensionCRD.yaml" ]]; then
+echo "--Installing extensions---"
+helm_cmd="helm install $additional_flags --values extensionCRD.yaml --wait kuadrant-extensions charts/kuadrant-extensions"
+eval "$helm_cmd"
+fi
 
 if [[ " $* " == *" -t "* ]]; then
 echo "--Installing tools operators"

@@ -5,6 +5,8 @@ set -e;
 
 cd "$(dirname "$0")"
 
+echo "Uninstalling extensions"
+helm uninstall --ignore-not-found --wait kuadrant-extensions
 echo "Uninstalling instances"
 helm uninstall --ignore-not-found --wait kuadrant-instances
 echo "Uninstalling operators"

@@ -1,0 +1,56 @@
+{{- if .Values.kuadrant.extensionsImage }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.kuadrant.extensionsName }}-extension
+  namespace: {{ .Values.kuadrant.extensionsNamespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.kuadrant.extensionsName }}-extension
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.kuadrant.extensionsName }}-extension
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Values.kuadrant.extensionsName }}-extension
+    spec:
+      serviceAccountName: {{ .Values.kuadrant.extensionsName }}-extension
+      securityContext:
+        runAsNonRoot: true
+      containers:
+      - name: {{ .Values.kuadrant.extensionsName }}
+        image: {{ .Values.kuadrant.extensionsImage }}
+        imagePullPolicy: Always
+        env:
+        - name: KUADRANT_EXTENSION_ADDRESS
+          value: "kuadrant-operator-extensions.{{ .Values.kuadrant.namespace }}.svc:50052"
+        - name: KUADRANT_EXTENSION_TOKEN_FILE
+          value: "/var/run/secrets/kuadrant/token"
+        volumeMounts:
+        - name: kuadrant-token
+          mountPath: /var/run/secrets/kuadrant
+          readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+      volumes:
+      - name: kuadrant-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: token
+              audience: kuadrant-extensions
+              expirationSeconds: 3600
+{{- end }}
