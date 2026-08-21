@@ -1,0 +1,68 @@
+{{- if and .Values.kuadrant.extensionsImage .Values.extensionCRD }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.kuadrant.extensionsName }}-extension
+  namespace: {{ .Values.kuadrant.extensionsNamespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.kuadrant.extensionsName }}-manager-role
+rules:
+  - apiGroups:
+    - extensions.kuadrant.io
+    resources:
+    - {{ .Values.kuadrant.extensionsResource }}
+    verbs:
+    - get
+    - list
+    - patch
+    - update
+    - watch
+  - apiGroups:
+    - extensions.kuadrant.io
+    resources:
+    - {{ .Values.kuadrant.extensionsResource }}/finalizers
+    verbs:
+    - update
+  - apiGroups:
+    - extensions.kuadrant.io
+    resources:
+    - {{ .Values.kuadrant.extensionsResource }}/status
+    verbs:
+    - get
+    - patch
+    - update
+  - apiGroups:
+    - gateway.networking.k8s.io
+    resources:
+    - httproutes
+    - gateways
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - extensions.kuadrant.io
+    resources:
+    - policyregistrations
+    resourceNames:
+    - {{ .Values.kuadrant.extensionsName | camelcase }}
+    verbs:
+    - register
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.kuadrant.extensionsName }}-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.kuadrant.extensionsName }}-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.kuadrant.extensionsName }}-extension
+  namespace: {{ .Values.kuadrant.extensionsNamespace }}
+{{- end }}

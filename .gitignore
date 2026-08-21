@@ -1,5 +1,6 @@
 additionalManifests.yaml
 extensionsManifests.yaml
+extensionCRD.yaml
 .idea
 
 # macOS system files
