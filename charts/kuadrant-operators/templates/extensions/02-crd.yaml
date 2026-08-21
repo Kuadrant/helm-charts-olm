@@ -1,0 +1,6 @@
+{{- if and .Values.kuadrant.extensionsImage .Values.extensionCRD }}
+{{- range .Values.extensionCRD }}
+---
+{{ tpl (. | toYaml) $ }}
+{{- end }}
+{{- end }}
