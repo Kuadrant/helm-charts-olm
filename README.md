@@ -64,6 +64,15 @@ and makes Helm consume additional values from additionalManifests.yaml and insta
 
 If you want to install just tools use `./tools-install.sh`. Add `-k` option to install on Kind.
 
+## Standalone Kuadrant extensions
+
+Standalone Kuadrant extensions (e.g. `pipeline-policy`) are deployed by their own `charts/kuadrant-extensions` chart,
+installed as a separate Helm release.
+
+Extensions are automatically installed by `./install.sh` when `kuadrant.extensionsImage` is set in
+[values.yaml](./values.yaml) and an `extensionCRD.yaml` file exists (see
+[example-extensionCRD.yaml](./example-extensionCRD.yaml)). Extensions are only supported on Kuadrant v1.6+ / RHCL v1.5+.
+
 ## Manual helm
 
 If you do not want to use helper `./install.sh` (and `./uninstall.sh`) script:
@@ -77,12 +86,17 @@ helm install --values values.yaml --wait -g charts/kuadrant-operators
 helm install --values values.yaml --values additionalManifests.yaml --wait -g charts/kuadrant-instances
 ```
 
-3. (Optional) Install tools operators
+3. (Optional) Install standalone extensions (e.g. `pipeline-policy`)
+```sh
+helm install --values values.yaml --values extensionCRD.yaml --wait -g charts/kuadrant-extensions
+```
+
+4. (Optional) Install tools operators
 ```sh
 helm install --values values-tools.yaml --wait -g charts/tools-operators
 ```
 
-4. (Optional) Install tools instances
+5. (Optional) Install tools instances
 ```sh
 helm install --values values-tools.yaml --wait --timeout 10m -g charts/tools-instances
 ```

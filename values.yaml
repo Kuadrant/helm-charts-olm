@@ -57,12 +57,20 @@ kuadrant:
   wasmPluginImage: ""
   protectedRegistry: ""
 
-  # (optional)
-  # Extensions image to patch into the operator CSV as an initContainer.
-  # The initContainer copies extension binaries from /extensions/ to a shared volume
-  # mounted at /extensions in the manager container.
-  # Example: quay.io/kuadrant/internal-extensions:latest
+  # Image for the standalone Kuadrant extensions (e.g. pipeline-policy), deployed
+  # as their own pods in the extensionsNamespace.
+  # Extensions are only supported on Kuadrant v1.6+ / RHCL v1.5+.
+  # pipeline-policy image: quay.io/kuadrant/internal-extensions:latest
   extensionsImage: "quay.io/kuadrant/internal-extensions:latest"
+
+  # Namespace where standalone Kuadrant extensions (e.g. pipeline-policy) are deployed.
+  extensionsNamespace: "kuadrant-extensions"
+
+  # Name of the standalone extension being deployed. Used to derive resource
+  # names (ServiceAccount, ClusterRole/Binding, Deployment)
+  # in the extensions chart templates.
+  # Change if deploying a differently named extension.
+  extensionsName: "pipeline-policy"
 
   # Enable observability (debug logging, tracing, monitoring) for Kuadrant and its components
   # When enabled, this will:
