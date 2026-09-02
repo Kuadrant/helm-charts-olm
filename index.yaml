@@ -3,7 +3,7 @@ entries:
   kuadrant-instances:
   - apiVersion: v2
     appVersion: 1.5.3-rc1-k-v4.22
-    created: "2026-09-01T08:59:50.141054359Z"
+    created: "2026-09-02T09:31:16.137946031Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
     digest: 62ac2d404c117473ac5a85123a7f08d9b6605788b18ebf4d91f90d3cada81532
     name: kuadrant-instances
@@ -13,7 +13,7 @@ entries:
     version: 1.5.3-rc1-k-v4.22
   - apiVersion: v2
     appVersion: 1.4.7-rc1-k-v4.21
-    created: "2026-09-01T08:59:50.140690434Z"
+    created: "2026-09-02T09:31:16.137456843Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
     digest: 7a4e6211fd561655c05fa3851dec375b8edde8d798ba6351ac557bb170016125
     name: kuadrant-instances
@@ -22,8 +22,18 @@ entries:
     - kuadrant-instances-1.4.7-rc1-k-v4.21.tgz
     version: 1.4.7-rc1-k-v4.21
   - apiVersion: v2
+    appVersion: 1.3.7-rc1-r-v4.21
+    created: "2026-09-02T09:31:16.136975398Z"
+    description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
+    digest: bc038745d3842c62506a11264bd4e360ce50c7a6c6fbf4104264781cab870b36
+    name: kuadrant-instances
+    type: application
+    urls:
+    - kuadrant-instances-1.3.7-rc1-r-v4.21.tgz
+    version: 1.3.7-rc1-r-v4.21
+  - apiVersion: v2
     appVersion: 0.0.0
-    created: "2026-09-01T08:59:50.140300476Z"
+    created: "2026-09-02T09:31:16.136505429Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (instances)
     digest: 89d7240d19604149ad2db4406080b3d6b0307539ebe435a7803ca6474f4a26a8
     name: kuadrant-instances
@@ -34,7 +44,7 @@ entries:
   kuadrant-operators:
   - apiVersion: v2
     appVersion: 1.5.3-rc1-k-v4.22
-    created: "2026-09-01T08:59:50.165412417Z"
+    created: "2026-09-02T09:31:16.175046918Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
     digest: 35b8d9c6ef8c0b62a5398cd8155a3b037b3f52d45640771ce950a58bc7cc018d
     name: kuadrant-operators
@@ -44,7 +54,7 @@ entries:
     version: 1.5.3-rc1-k-v4.22
   - apiVersion: v2
     appVersion: 1.4.7-rc1-k-v4.21
-    created: "2026-09-01T08:59:50.157357568Z"
+    created: "2026-09-02T09:31:16.166083133Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
     digest: 8deea5288f8e102571dff96adc09afe8513579c021786f5a30d23b4d5a7d4dcf
     name: kuadrant-operators
@@ -53,8 +63,18 @@ entries:
     - kuadrant-operators-1.4.7-rc1-k-v4.21.tgz
     version: 1.4.7-rc1-k-v4.21
   - apiVersion: v2
+    appVersion: 1.3.7-rc1-r-v4.21
+    created: "2026-09-02T09:31:16.156101219Z"
+    description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
+    digest: 83994999ee44ee6ac6ec0d632fd71229d82ce1632a0ad91553c0f809a8c518e7
+    name: kuadrant-operators
+    type: application
+    urls:
+    - kuadrant-operators-1.3.7-rc1-r-v4.21.tgz
+    version: 1.3.7-rc1-r-v4.21
+  - apiVersion: v2
     appVersion: 0.0.0
-    created: "2026-09-01T08:59:50.149505269Z"
+    created: "2026-09-02T09:31:16.147245857Z"
     description: A Helm chart deploying Kuadrant/RHCL with dependencies via OLM (operators)
     digest: 96b898164433b69b08ce319045b7e730fee30f056f7be867ff33d8971f648b88
     name: kuadrant-operators
@@ -65,7 +85,7 @@ entries:
   tools-instances:
   - apiVersion: v2
     appVersion: 1.5.3-rc1-k-v4.22
-    created: "2026-09-01T08:59:50.174676976Z"
+    created: "2026-09-02T09:31:16.189458599Z"
     dependencies:
     - condition: tools.vault.enable
       name: vault
@@ -80,7 +100,7 @@ entries:
     version: 1.5.3-rc1-k-v4.22
   - apiVersion: v2
     appVersion: 1.4.7-rc1-k-v4.21
-    created: "2026-09-01T08:59:50.17176989Z"
+    created: "2026-09-02T09:31:16.186257925Z"
     dependencies:
     - condition: tools.vault.enable
       name: vault
@@ -94,8 +114,23 @@ entries:
     - tools-instances-1.4.7-rc1-k-v4.21.tgz
     version: 1.4.7-rc1-k-v4.21
   - apiVersion: v2
+    appVersion: 1.3.7-rc1-r-v4.21
+    created: "2026-09-02T09:31:16.182505199Z"
+    dependencies:
+    - condition: tools.vault.enable
+      name: vault
+      repository: https://helm.releases.hashicorp.com
+      version: 0.32.0
+    description: A Helm chart containing tools needed for testing Kuadrant
+    digest: b8ccb84f5037716e239cca2c0b89f77342a5d6d69b90ac0fa5b9144630b3ab2b
+    name: tools-instances
+    type: application
+    urls:
+    - tools-instances-1.3.7-rc1-r-v4.21.tgz
+    version: 1.3.7-rc1-r-v4.21
+  - apiVersion: v2
     appVersion: 0.0.0
-    created: "2026-09-01T08:59:50.168869433Z"
+    created: "2026-09-02T09:31:16.178501835Z"
     dependencies:
     - condition: tools.vault.enable
       name: vault
@@ -111,7 +146,7 @@ entries:
   tools-operators:
   - apiVersion: v2
     appVersion: 1.5.3-rc1-k-v4.22
-    created: "2026-09-01T08:59:50.176378782Z"
+    created: "2026-09-02T09:31:16.190806731Z"
     description: A Helm chart containing operators tools needed for testing Kuadrant
     digest: 9a0178a71b4dc3e5c2c67ca268c1fa66cb2664773019e869b38dff7a96ddc6c2
     name: tools-operators
@@ -121,7 +156,7 @@ entries:
     version: 1.5.3-rc1-k-v4.22
   - apiVersion: v2
     appVersion: 1.4.7-rc1-k-v4.21
-    created: "2026-09-01T08:59:50.176053142Z"
+    created: "2026-09-02T09:31:16.19043442Z"
     description: A Helm chart containing operators tools needed for testing Kuadrant
     digest: 120c03179cf93809a1b0270281f0b2d99c9c431b9640d1e42f3e72ece61eda5a
     name: tools-operators
@@ -130,8 +165,18 @@ entries:
     - tools-operators-1.4.7-rc1-k-v4.21.tgz
     version: 1.4.7-rc1-k-v4.21
   - apiVersion: v2
+    appVersion: 1.3.7-rc1-r-v4.21
+    created: "2026-09-02T09:31:16.190076981Z"
+    description: A Helm chart containing operators tools needed for testing Kuadrant
+    digest: 96647185c72bf03cbc7560163b5f274a2c141c790ae6ba4009105b486169007d
+    name: tools-operators
+    type: application
+    urls:
+    - tools-operators-1.3.7-rc1-r-v4.21.tgz
+    version: 1.3.7-rc1-r-v4.21
+  - apiVersion: v2
     appVersion: 0.0.0
-    created: "2026-09-01T08:59:50.174918558Z"
+    created: "2026-09-02T09:31:16.189765642Z"
     description: A Helm chart containing operators tools needed for testing Kuadrant
     digest: 2f6fabe67d44f5ed37545a6f28ec8aff52cc61a5ce4f8e984e769387c33d1592
     name: tools-operators
@@ -139,4 +184,4 @@ entries:
     urls:
     - tools-operators-0.0.0.tgz
     version: 0.0.0
-generated: "2026-09-01T08:59:50.139823695Z"
+generated: "2026-09-02T09:31:16.135919256Z"
