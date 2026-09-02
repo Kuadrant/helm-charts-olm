@@ -93,6 +93,10 @@ jobs:
           ./script/get-all-versions.sh > frozen-versions.yaml
           echo "Frozen versions:\n\n"
           cat frozen-versions.yaml
+          # Expose values in github action summary
+          printf '# Frozen versions\n```yaml\n' >> "$GITHUB_STEP_SUMMARY"
+          cat frozen-versions.yaml >> "$GITHUB_STEP_SUMMARY"
+          printf '```\n' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Merge frozen versions with values files
         run: |
