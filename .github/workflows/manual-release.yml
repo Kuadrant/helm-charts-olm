@@ -72,6 +72,9 @@ jobs:
       - name: Log in to registry.redhat.io
         run: podman login -u "${{ secrets.REDHAT_REGISTRY_USER }}" -p "${{ secrets.REDHAT_REGISTRY_PASSWORD }}" registry.redhat.io
 
+      - name: Log in to quay.io
+        run: podman login -u "${{ secrets.QUAY_REGISTRY_USER }}" -p "${{ secrets.QUAY_REGISTRY_PASSWORD }}" quay.io
+
       - name: Validate index image
         run: |
           if opm render "${{ inputs.indexImage }}" > /dev/null; then
