@@ -30,6 +30,7 @@ tools:
     image: ghcr.io/valkey-io/valkey:latest
   vault:
     enable: true
+    installSCC: true
   coredns:
     enable: false
     metrics: false

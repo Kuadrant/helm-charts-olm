@@ -42,6 +42,8 @@ spec:
       labels:
         app: keycloak-db
     spec:
+      securityContext:
+        fsGroup: 26
       containers:
         - name: keycloak-db
           image: {{ .Values.tools.keycloak.database.image }}
