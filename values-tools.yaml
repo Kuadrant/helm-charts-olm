@@ -1,4 +1,5 @@
 tools:
+  openshift: true
   namespace: tools
   jaeger:
     enable: true
