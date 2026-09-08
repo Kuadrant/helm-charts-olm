@@ -1,4 +1,4 @@
-{{ if .Values.tools.vault.enable }}
+{{ if and .Values.tools.vault.enable .Values.tools.vault.installSCC }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
