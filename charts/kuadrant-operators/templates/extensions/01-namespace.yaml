@@ -1,0 +1,6 @@
+{{- if and .Values.kuadrant.extensionsImage .Values.extensionCRD }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.kuadrant.extensionsNamespace }}
+{{- end }}

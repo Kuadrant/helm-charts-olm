@@ -13,12 +13,19 @@ for arg in "$@"; do
         -t)
             additional_flags+=" --values additionalManifests.yaml --set tools.enabled=true"
             ;;
-        -e)
-            echo "Including extensions manifests"
-            additional_flags+=" --values extensionsManifests.yaml"
-            ;;
     esac
 done
+
+extensions_image=$(grep 'extensionsImage:' values.yaml | head -1 | sed 's/.*extensionsImage:[[:space:]]*"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | xargs)
+
+if [[ -n "$extensions_image" && -f "extensionCRD.yaml" ]]; then
+    additional_flags+=" --values extensionCRD.yaml"
+    echo "Extensions enabled: image=$extensions_image, CRD=extensionCRD.yaml"
+elif [[ -n "$extensions_image" && ! -f "extensionCRD.yaml" ]]; then
+    echo "WARNING: extensionsImage is set but extensionCRD.yaml is missing — extensions will NOT be installed"
+elif [[ -z "$extensions_image" && -f "extensionCRD.yaml" ]]; then
+    echo "WARNING: extensionCRD.yaml is present but extensionsImage is empty — extensions will NOT be installed"
+fi
 
 if [[ "$INSTALL_RHCL_GA" == "true" ]]; then
     additional_flags+=" --set kuadrant.indexImage='' --set kuadrant.operatorName=rhcl-operator --set kuadrant.channel=stable"
