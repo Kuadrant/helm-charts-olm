@@ -64,13 +64,37 @@ and makes Helm consume additional values from additionalManifests.yaml and insta
 
 If you want to install just tools use `./tools-install.sh`. Add `-k` option to install on Kind.
 
+## Kuadrant extensions
+
+Kuadrant extensions (e.g. `pipeline-policy`) are deployed as part of the `charts/kuadrant-operators` chart.
+Extensions are only supported on Kuadrant v1.6+ / RHCL v1.5+.
+
+Extensions are installed when **both** conditions are met:
+- `kuadrant.extensionsImage` is set in [values.yaml](./values.yaml)
+- An `extensionCRD.yaml` file exists (copy [example-extensionCRD.yaml](./example-extensionCRD.yaml) and adjust for your extension)
+
+To enable extensions:
+
+1. Set the extension image and metadata in `values.yaml`:
+```yaml
+kuadrant:
+  extensionsImage: "quay.io/kuadrant/internal-extensions:latest"
+  extensionsNamespace: "kuadrant-extensions"
+  extensionsName: "pipeline-policy"
+  extensionsResource: "pipelinepolicies"
+```
+
+2. Create `extensionCRD.yaml` with your extension's CRD definition (see [example-extensionCRD.yaml](./example-extensionCRD.yaml) for reference).
+
+3. Run `./install.sh` — extensions are automatically picked up when both the image and CRD file are present. If either one is missing, extensions will not be deployed.
+
 ## Manual helm
 
 If you do not want to use helper `./install.sh` (and `./uninstall.sh`) script:
 
-1. Install Operators
+1. Install Operators (add `--values extensionCRD.yaml` to include extensions)
 ```sh
-helm install --values values.yaml --wait -g charts/kuadrant-operators
+helm install --values values.yaml [--values extensionCRD.yaml] --wait -g charts/kuadrant-operators
 ```
 2. Install instances (operands)
 ```sh

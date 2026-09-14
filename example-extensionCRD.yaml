@@ -1,4 +1,11 @@
-extensionsManifests:
+# Values file for a single standalone Kuadrant extension (rendered with `tpl`).
+#
+# You provide: the CustomResourceDefinition (group/kind/plural/schema)
+# specific to your extension's API.
+#
+# RBAC (ClusterRole, ClusterRoleBinding) and ServiceAccount are managed
+# by the Helm chart templates automatically based on `.Values.kuadrant.extensionsName`.
+extensionCRD:
   - apiVersion: apiextensions.k8s.io/v1
     kind: CustomResourceDefinition
     metadata:
@@ -247,44 +254,3 @@ extensionsManifests:
         storage: true
         subresources:
           status: {}
-  - apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRole
-    metadata:
-      name: pipeline-policy-manager-role
-    rules:
-    - apiGroups:
-      - extensions.kuadrant.io
-      resources:
-      - pipelinepolicies
-      verbs:
-      - get
-      - list
-      - patch
-      - update
-      - watch
-    - apiGroups:
-      - extensions.kuadrant.io
-      resources:
-      - pipelinepolicies/finalizers
-      verbs:
-      - update
-    - apiGroups:
-      - extensions.kuadrant.io
-      resources:
-      - pipelinepolicies/status
-      verbs:
-      - get
-      - patch
-      - update
-  - apiVersion: rbac.authorization.k8s.io/v1
-    kind: ClusterRoleBinding
-    metadata:
-      name: pipeline-policy-manager-rolebinding
-    roleRef:
-      apiGroup: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: pipeline-policy-manager-role
-    subjects:
-    - kind: ServiceAccount
-      name: kuadrant-operator-controller-manager
-      namespace: kuadrant-system
