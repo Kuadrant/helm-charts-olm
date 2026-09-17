@@ -39,7 +39,7 @@ spec:
         value: "1"
 {{- if .Values.kuadrant.enableObservability }}
       - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-        value: "http://jaeger-collector.tools.svc.cluster.local:4318"
+        value: "rpc://jaeger-collector.tools.svc.cluster.local:4317"
       - name: "OTEL_EXPORTER_OTLP_INSECURE"
         value: "true"
       - name: "LOG_LEVEL"
