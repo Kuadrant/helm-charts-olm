@@ -118,7 +118,8 @@ data:
     kubectl wait --for=condition=Ready kuadrant kuadrant-sample --namespace {{ .namespace }} --timeout=300s
 
     ENABLE_OBSERVABILITY="{{ .enableObservability }}"
-    # Patch limitador subscription with OTEL env vars if observability is enabled
+    # Patch limitador subscription (older Kuadrant versions) or limitador-operator
+    # deployment (newer versions) with OTEL env vars if observability is enabled
     # Patch limitador and authorino CRs to enable debug logging and wait for ready status
     if [[ "$ENABLE_OBSERVABILITY" == "true" ]]; then
         LIMITADOR_SUB=$(kubectl get subscription --namespace {{ .namespace }} -o json | jq -r '.items[] | select(.spec.name=="limitador-operator") | .metadata.name')
@@ -129,7 +130,7 @@ data:
                   "env": [
                     {
                       "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
-                      "value": "http://jaeger-collector.tools.svc.cluster.local:4318"
+                      "value": "rpc://jaeger-collector.tools.svc.cluster.local:4317"
                     },
                     {
                       "name": "OTEL_EXPORTER_OTLP_INSECURE",
@@ -139,8 +140,32 @@ data:
                 }
               }
             }'
+        elif kubectl get deployment limitador-operator-controller-manager --namespace {{ .namespace }} &>/dev/null; then
+            kubectl patch deployment limitador-operator-controller-manager --namespace {{ .namespace }} --type strategic --patch '{
+              "spec": {
+                "template": {
+                  "spec": {
+                    "containers": [
+                      {
+                        "name": "manager",
+                        "env": [
+                          {
+                            "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+                            "value": "rpc://jaeger-collector.tools.svc.cluster.local:4317"
+                          },
+                          {
+                            "name": "OTEL_EXPORTER_OTLP_INSECURE",
+                            "value": "true"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }'
         else
-            echo "Warning: limitador-operator subscription not found in namespace {{ .namespace }}"
+            echo "Warning: limitador-operator subscription and limitador-operator-controller-manager deployment not found in namespace {{ .namespace }}"
         fi
 
         kubectl patch limitador limitador --namespace {{ .namespace }} --type merge --patch '{"spec":{"verbosity":3}}'
