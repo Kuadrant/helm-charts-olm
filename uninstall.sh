@@ -7,10 +7,11 @@ cd "$(dirname "$0")"
 
 echo "Uninstalling instances"
 helm uninstall --ignore-not-found --wait kuadrant-instances
+echo "Deleting Kuadrant CRDs"
+kubectl get crd -o name | grep "kuadrant" | xargs --no-run-if-empty kubectl delete
 echo "Uninstalling operators"
 helm uninstall --ignore-not-found --wait kuadrant-operators
 kubectl delete --ignore-not-found ns cert-manager
-kubectl get crd -o name | grep "kuadrant" | xargs --no-run-if-empty kubectl delete
 kubectl delete  --ignore-not-found consoleplugin.console.openshift.io/kuadrant-console-plugin
 echo "Uninstalling tools instances"
 helm uninstall --ignore-not-found --wait tools-instances
