@@ -1,0 +1,21 @@
+{{- if and .Values.kuadrant.extensionsImage .Values.extensionCRD }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-standalone-extensions
+  namespace: {{ .Values.kuadrant.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      control-plane: controller-manager
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.kuadrant.extensionsNamespace }}
+      ports:
+        - protocol: TCP
+          port: 50052
+{{- end }}
