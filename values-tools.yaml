@@ -6,7 +6,7 @@ tools:
     image: quay.io/jaegertracing/jaeger
   mockserver:
     enable: true
-    image: quay.io/rhn_support_azgabur/mockserver:latest
+    image: quay.io/rhn_support_azgabur/mockserver:9.0.0
   keycloak:
     enable: true
     # 'operator' for RHBK operator
