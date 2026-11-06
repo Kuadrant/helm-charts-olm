@@ -1,0 +1,57 @@
+{{if and (eq .Values.istio.istioProvider "ossm3") (ne .Values.kuadrant.operatorName "authorino-operator") }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-ready-hook
+  namespace: {{ .Values.istio.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-ready-hook-role
+rules:
+- apiGroups:
+  - sailoperator.io
+  resources:
+  - istios
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-ready-hook-rb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-ready-hook-role
+subjects:
+- kind: ServiceAccount
+  name: istio-ready-hook
+  namespace: {{ .Values.istio.namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: istio-ready-hook
+  namespace: {{ .Values.istio.namespace }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -xec
+        - |-
+          kubectl wait --for=condition=Ready istio default --timeout=300s
+        image: quay.io/kuadrant/testsuite-pipelines-tools:latest
+        name: istio-ready
+      serviceAccountName: istio-ready-hook
+      restartPolicy: OnFailure
+{{ end }}
